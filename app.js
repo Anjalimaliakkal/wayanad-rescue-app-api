@@ -66,6 +66,27 @@ app.post("/addMissingPeople", (req, res) => {
     })
 })
 
+app.post("/viewall", (req, res) => {
+
+    let token = req.headers.token
+    jwt.verify(token, "RescueApp", (error, decoded) => {
+        if (decoded && decoded.email) {
+
+            PeopleModel.find().then(
+                (items) => {
+                    res.json(items)
+                }
+            ).catch(
+                (error) => {
+                    res.json({ "status": "error" })
+                }
+            )
+        } else {
+            res.json({ "status": "invalid Authentication" })
+        }
+    })
+})
+
 app.listen(8080, () => {
     console.log("server started")
 })
