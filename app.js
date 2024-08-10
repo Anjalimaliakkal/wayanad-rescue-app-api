@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt")
 const cors = require("cors")
 const jwt = require('jsonwebtoken');
 const loginModel = require("./models/admin")
+const PeopleModel=require("./models/missingPeople")
 const app = express()
 app.use(cors())
 app.use(express.json())
@@ -33,7 +34,7 @@ app.post("/adminSignin", (req, res) => {
             if (response.length > 0) {
                 const validator = bcrypt.compareSync(input.password, response[0].password)
                 if (validator) {
-                    jwt.sign({ email: input.username }, "patientApp", { expiresIn: "7d" },
+                    jwt.sign({ email: input.username }, "RescueApp", { expiresIn: "7d" },
                         (error, token) => {
                             if (error) {
                                 res.json({"status":"token creation failed"})
@@ -49,6 +50,20 @@ app.post("/adminSignin", (req, res) => {
             }
         }
     ).catch()
+})
+
+app.post("/addMissingPeople", (req, res) => {
+    let input = req.body
+    let token=req.headers.token
+    jwt.verify(token,"RescueApp",(error,decoded)=>{
+        if (decoded && decoded.email) {
+            let result=new PeopleModel(input)
+            result.save()
+            res.json({ "status": "success" })
+        } else {
+            res.json({ "status": "invalid authentication" })
+        }
+    })
 })
 
 app.listen(8080, () => {
